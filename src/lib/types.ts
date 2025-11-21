@@ -31,3 +31,16 @@ export interface Settings {
   useManualLocation: boolean;
   reminderMinutesBefore: number;
 }
+
+export interface WeatherData {
+  main: string;
+  description: string;
+  temp: number;
+  feelsLike: number;
+  icon: string;
+}
+
+export interface WeatherSuggestion {
+  item: string;
+  reason: string;
+}
