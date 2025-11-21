@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { MapPin, Navigation, Search } from "lucide-react";
+import { MapPin, Navigation, Search, CloudRain, Wind, Droplets } from "lucide-react";
 import { getSettings, updateSettings } from "@/lib/storage";
 import { toast } from "sonner";
+import { getCurrentWeather, getWeatherEmoji } from "@/lib/weatherService";
+import type { WeatherCondition } from "@/lib/weatherService";
 
 const WEATHER_API_KEY = 'b3fc347c6fec23bd0faf3e47f764767f';
 
@@ -27,6 +29,27 @@ export const LocationView = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<GeocodeResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [currentWeather, setCurrentWeather] = useState<WeatherCondition | null>(null);
+  const [isLoadingWeather, setIsLoadingWeather] = useState(false);
+
+  useEffect(() => {
+    const loadWeather = async () => {
+      const location = settings.useManualLocation 
+        ? settings.manualLocation 
+        : settings.homeLocation;
+      
+      if (!location) return;
+
+      setIsLoadingWeather(true);
+      const weather = await getCurrentWeather(location.latitude, location.longitude);
+      setCurrentWeather(weather);
+      setIsLoadingWeather(false);
+    };
+
+    loadWeather();
+    const interval = setInterval(loadWeather, 300000); // Refresh every 5 minutes
+    return () => clearInterval(interval);
+  }, [settings.homeLocation, settings.manualLocation, settings.useManualLocation]);
 
   const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -134,6 +157,33 @@ export const LocationView = () => {
           Set your home location for location-based reminders
         </p>
       </div>
+
+      {currentWeather && (settings.homeLocation || settings.manualLocation) && (
+        <Card className="bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Current Weather</p>
+                <p className="text-4xl font-bold">
+                  {getWeatherEmoji(currentWeather)} {currentWeather.temp}°C
+                </p>
+                <p className="text-sm capitalize text-muted-foreground">
+                  {currentWeather.description}
+                </p>
+              </div>
+              <div className="space-y-2 text-right">
+                <div className="flex items-center gap-2 text-sm">
+                  <Droplets className="h-4 w-4" />
+                  <span>Feels like {currentWeather.feelsLike}°C</span>
+                </div>
+              </div>
+            </div>
+            {isLoadingWeather && (
+              <p className="text-xs text-muted-foreground mt-2">Refreshing...</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
