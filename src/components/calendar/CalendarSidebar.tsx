@@ -208,7 +208,7 @@ export const CalendarSidebar = () => {
                               No matching checklists found
                             </p>
                             <p className="text-xs text-muted-foreground/70 mt-1">
-                              Try keywords like: gym, beach, work, travel
+                              Try: gym, beach, work
                             </p>
                           </div>
                         )}
