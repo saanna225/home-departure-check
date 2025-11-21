@@ -18,11 +18,12 @@ export const setCalendarEvents = (events: CalendarEvent[]): void => {
   localStorage.setItem(CALENDAR_KEY, JSON.stringify(events));
 };
 
-export const addCalendarEvent = (event: Omit<CalendarEvent, "id">): void => {
+export const addCalendarEvent = (event: Omit<CalendarEvent, "id" | "checkedItems">): void => {
   const events = getCalendarEvents();
   const newEvent: CalendarEvent = {
     ...event,
     id: Date.now().toString(),
+    checkedItems: [],
   };
   events.push(newEvent);
   setCalendarEvents(events);
