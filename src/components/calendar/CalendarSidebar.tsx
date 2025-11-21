@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calendar as CalendarIcon, Plus, X, Package } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, X, Package, Search } from "lucide-react";
 import { format, isPast, isToday } from "date-fns";
 import {
   Sidebar,
@@ -15,13 +15,17 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getCalendarEvents, deleteCalendarEvent, updateCalendarEvent } from "@/lib/calendarStorage";
 import { getChecklists } from "@/lib/storage";
 import { CalendarEvent, ChecklistItem } from "@/lib/types";
 import { AddEventDialog } from "./AddEventDialog";
 import { EditEventDialog } from "./EditEventDialog";
+import { EventCard } from "./EventCard";
 import { matchChecklistsByKeywords, getTemplateItemsForTitle } from "@/lib/keywordMatcher";
 import { cn } from "@/lib/utils";
+import { useSwipe } from "@/hooks/useSwipe";
 
 export const CalendarSidebar = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -29,6 +33,7 @@ export const CalendarSidebar = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const refreshEvents = () => {
     setEvents(getCalendarEvents());
@@ -82,8 +87,14 @@ export const CalendarSidebar = () => {
   const allEvents = events
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
-  const upcomingEvents = allEvents.filter((e) => !isPast(e.date) || isToday(e.date)).slice(0, 5);
-  const pastEvents = allEvents.filter((e) => isPast(e.date) && !isToday(e.date)).slice(0, 3);
+  const filteredEvents = searchQuery
+    ? allEvents.filter((e) =>
+        e.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : allEvents;
+
+  const upcomingEvents = filteredEvents.filter((e) => !isPast(e.date) || isToday(e.date)).slice(0, 5);
+  const pastEvents = filteredEvents.filter((e) => isPast(e.date) && !isToday(e.date)).slice(0, 3);
 
   const selectedDateEvents = events.filter(
     (e) => selectedDate && format(e.date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
@@ -125,6 +136,17 @@ export const CalendarSidebar = () => {
               <Plus className="h-4 w-4" />
             </Button>
           </div>
+          <div className="px-4 pb-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search events..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9"
+              />
+            </div>
+          </div>
           <SidebarGroupContent>
             <ScrollArea className="h-[300px] px-4">
               {upcomingEvents.length === 0 ? (
@@ -143,87 +165,16 @@ export const CalendarSidebar = () => {
                     const isPastEvent = isPast(event.date) && !isToday(event.date);
 
                     return (
-                      <div
+                      <EventCard
                         key={event.id}
-                        onClick={() => handleEventClick(event)}
-                        className={cn(
-                          "rounded-lg border border-border/40 bg-card/30 backdrop-blur-sm p-3 hover-lift transition-opacity cursor-pointer",
-                          isPastEvent && "opacity-40"
-                        )}
-                      >
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-sm text-foreground truncate">
-                              {event.title}
-                            </h4>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {format(event.date, "MMM d, yyyy")}
-                              {event.time && ` at ${event.time}`}
-                            </p>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                            onClick={(e) => handleDeleteEvent(event.id, e)}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-
-                        {items.length > 0 ? (
-                          <div className="mt-3 pt-3 border-t border-border/40">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Package className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-xs font-medium text-muted-foreground">
-                                Pack List ({checkedCount}/{items.length})
-                              </span>
-                            </div>
-                            <div className="space-y-1.5 max-h-32 overflow-y-auto">
-                              {items.slice(0, 5).map((item) => (
-                                <div
-                                  key={item.id}
-                                  className="flex items-center gap-2"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <Checkbox
-                                    id={`${event.id}-${item.id}`}
-                                    checked={event.checkedItems.includes(item.id)}
-                                    onCheckedChange={() =>
-                                      handleToggleItem(event.id, item.id)
-                                    }
-                                    className="h-3 w-3"
-                                  />
-                                  <label
-                                    htmlFor={`${event.id}-${item.id}`}
-                                    className={cn(
-                                      "text-xs cursor-pointer flex-1",
-                                      event.checkedItems.includes(item.id) &&
-                                        "line-through text-muted-foreground"
-                                    )}
-                                  >
-                                    {item.text}
-                                  </label>
-                                </div>
-                              ))}
-                              {items.length > 5 && (
-                                <p className="text-xs text-muted-foreground italic">
-                                  +{items.length - 5} more items
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="mt-3 pt-3 border-t border-border/40 text-center">
-                            <p className="text-xs text-muted-foreground">
-                              No matching checklists found
-                            </p>
-                            <p className="text-xs text-muted-foreground/70 mt-1">
-                              Try: gym, beach, work
-                            </p>
-                          </div>
-                        )}
-                      </div>
+                        event={event}
+                        items={items}
+                        checkedCount={checkedCount}
+                        isPastEvent={isPastEvent}
+                        onEventClick={handleEventClick}
+                        onDeleteEvent={handleDeleteEvent}
+                        onToggleItem={handleToggleItem}
+                      />
                     );
                   })}
                 </div>

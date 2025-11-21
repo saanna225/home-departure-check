@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Pencil, Trash2, Plus, X } from "lucide-react";
+import { Pencil, Trash2, Plus, X, CheckCheck } from "lucide-react";
 import { Checklist } from "@/lib/types";
 import { updateChecklist, deleteChecklist } from "@/lib/storage";
 import { toast } from "sonner";
@@ -62,6 +62,17 @@ export const ChecklistCard = ({ checklist, onToggleItem, onDelete, onUpdate }: C
     toast.success("Checklist deleted");
   };
 
+  const handleCheckAll = () => {
+    const allChecked = checklist.items.every((item) => item.checked);
+    
+    updateChecklist(checklist.id, {
+      items: checklist.items.map((item) => ({ ...item, checked: !allChecked })),
+    });
+    
+    onUpdate();
+    toast.success(allChecked ? "All items unchecked" : "All items checked!");
+  };
+
   const completedCount = checklist.items.filter((item) => item.checked).length;
   const totalCount = checklist.items.length;
 
@@ -83,6 +94,14 @@ export const ChecklistCard = ({ checklist, onToggleItem, onDelete, onUpdate }: C
               </div>
             </div>
             <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCheckAll}
+                title={checklist.items.every((item) => item.checked) ? "Uncheck all" : "Check all"}
+              >
+                <CheckCheck className="h-4 w-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"

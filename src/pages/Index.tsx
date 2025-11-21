@@ -6,6 +6,7 @@ import { ScheduleView } from "@/components/schedule/ScheduleView";
 import { LocationView } from "@/components/location/LocationView";
 import { ReminderPreview } from "@/components/reminders/ReminderPreview";
 import { CalendarSidebar } from "@/components/calendar/CalendarSidebar";
+import { FeedbackForm } from "@/components/feedback/FeedbackForm";
 import { ListChecks, Calendar, MapPin, Bell } from "lucide-react";
 import { checkAndTriggerReminders } from "@/lib/reminderEngine";
 import { toast } from "sonner";
@@ -123,6 +124,44 @@ const Index = () => {
               </TabsContent>
             </Tabs>
           </main>
+
+          {/* Footer Section */}
+          <footer className="border-t border-border bg-card/80 backdrop-blur-xl">
+            <div className="container mx-auto px-4 py-8 space-y-8">
+              {/* Feedback Form */}
+              <div className="max-w-2xl mx-auto">
+                <FeedbackForm />
+              </div>
+
+              {/* Closing Message */}
+              <div className="text-center space-y-2">
+                <p className="text-lg font-medium bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  Now's the time to never get scolded by your mom! 🎒
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Pack smart, leave stress behind
+                </p>
+              </div>
+
+              {/* Credits */}
+              <div className="text-center space-y-1 pt-4 border-t border-border/40">
+                <p className="text-sm text-muted-foreground">
+                  Built with ❤️ by <span className="font-semibold text-foreground">Sahana</span>
+                </p>
+                <p className="text-xs text-muted-foreground/70">
+                  Powered by{" "}
+                  <a 
+                    href="https://lovable.dev" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    Lovable
+                  </a>
+                </p>
+              </div>
+            </div>
+          </footer>
         </div>
       </div>
     </SidebarProvider>
