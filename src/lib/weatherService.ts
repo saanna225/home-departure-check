@@ -11,16 +11,11 @@ export interface WeatherSuggestion {
   reason: string;
 }
 
-// Free OpenWeatherMap API - users can sign up for their own key
-const WEATHER_API_KEY = 'demo'; // Replace with actual key or use env variable
+// OpenWeatherMap API
+const WEATHER_API_KEY = 'b3fc347c6fec23bd0faf3e47f764767f';
 
 export async function getCurrentWeather(lat: number, lon: number): Promise<WeatherCondition | null> {
   try {
-    // For demo purposes, return mock data if API key is 'demo'
-    if (WEATHER_API_KEY === 'demo') {
-      return getMockWeather();
-    }
-
     const response = await fetch(
       `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`
     );
