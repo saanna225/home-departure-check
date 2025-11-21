@@ -13,11 +13,18 @@ const Index = () => {
 
   // Check for reminders on mount and periodically
   useEffect(() => {
-    const checkReminders = () => {
-      const reminders = checkAndTriggerReminders();
+    const checkReminders = async () => {
+      const reminders = await checkAndTriggerReminders();
       reminders.forEach((reminder) => {
+        const weatherInfo = reminder.weather 
+          ? `${reminder.weather.temp}°C, ${reminder.weather.description}` 
+          : '';
+        const suggestions = reminder.weatherSuggestions?.length 
+          ? `\n\nWeather suggestions: ${reminder.weatherSuggestions.map(s => s.item).join(', ')}`
+          : '';
+        
         toast(reminder.message, {
-          description: `${reminder.items.length} items to check`,
+          description: `${reminder.items.length} items to check${weatherInfo ? ` • ${weatherInfo}` : ''}${suggestions}`,
           action: {
             label: "View List",
             onClick: () => setActiveTab("checklists"),
