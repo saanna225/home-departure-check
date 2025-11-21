@@ -67,7 +67,7 @@ export const ChecklistCard = ({ checklist, onToggleItem, onDelete, onUpdate }: C
 
   return (
     <>
-      <Card className="shadow-sm hover:shadow-md transition-shadow">
+      <Card className="shadow-sm hover-lift border-border/50 bg-gradient-to-br from-card to-card/95 backdrop-blur-sm">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

@@ -44,7 +44,7 @@ export const ScheduleCard = ({ checklist, schedule, onUpdate }: ScheduleCardProp
   };
 
   return (
-    <Card>
+    <Card className="hover-lift border-border/50 bg-gradient-to-br from-card to-card/95 backdrop-blur-sm">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

@@ -43,11 +43,20 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Animated Background Mesh */}
+      <div className="fixed inset-0 gradient-mesh-bg pointer-events-none" />
+      
+      {/* Floating Orbs */}
+      <div className="fixed top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float pointer-events-none" />
+      <div className="fixed bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float-delayed pointer-events-none" />
+      
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-card shadow-sm">
+      <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl shadow-sm">
         <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-foreground">PrepCheck</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent animate-pulse-glow">
+            PrepCheck
+          </h1>
           <p className="text-sm text-muted-foreground">Never forget what matters</p>
         </div>
       </header>
@@ -56,8 +65,8 @@ const Index = () => {
       <ReminderPreview />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6 pb-24">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <main className="container mx-auto px-4 py-6 pb-24 relative z-10">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full animate-slide-in-up">
           <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="checklists" className="flex items-center gap-2">
               <ListChecks className="h-4 w-4" />
