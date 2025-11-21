@@ -52,7 +52,20 @@ export const AddEventDialog = ({ open, onOpenChange, onSuccess }: AddEventDialog
       notes: notes || undefined,
     });
 
-    toast.success("Event added!");
+    const itemCount = suggestedChecklists.reduce((count, id) => {
+      const checklist = checklists.find((c) => c.id === id);
+      return count + (checklist?.items.length || 0);
+    }, 0);
+
+    toast.success(
+      `Event added!${itemCount > 0 ? ` ${itemCount} items to pack.` : ""}`,
+      {
+        description: suggestedChecklists.length > 0 
+          ? "Check the calendar sidebar to see your pack list"
+          : undefined,
+      }
+    );
+    
     setTitle("");
     setDate(undefined);
     setTime("");

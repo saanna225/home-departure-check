@@ -51,5 +51,6 @@ export interface CalendarEvent {
   date: Date;
   time?: string;
   suggestedChecklistIds: string[];
+  checkedItems: string[]; // IDs of items that have been checked off
   notes?: string;
 }

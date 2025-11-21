@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Calendar as CalendarIcon, Plus, X } from "lucide-react";
-import { format } from "date-fns";
+import { Calendar as CalendarIcon, Plus, X, Package } from "lucide-react";
+import { format, isPast, isToday } from "date-fns";
 import {
   Sidebar,
   SidebarContent,
@@ -14,10 +14,12 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { getCalendarEvents, deleteCalendarEvent } from "@/lib/calendarStorage";
+import { Checkbox } from "@/components/ui/checkbox";
+import { getCalendarEvents, deleteCalendarEvent, updateCalendarEvent } from "@/lib/calendarStorage";
 import { getChecklists } from "@/lib/storage";
-import { CalendarEvent } from "@/lib/types";
+import { CalendarEvent, ChecklistItem } from "@/lib/types";
 import { AddEventDialog } from "./AddEventDialog";
+import { cn } from "@/lib/utils";
 
 export const CalendarSidebar = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -34,10 +36,34 @@ export const CalendarSidebar = () => {
     refreshEvents();
   };
 
-  const upcomingEvents = events
-    .filter((e) => e.date >= new Date())
-    .sort((a, b) => a.date.getTime() - b.date.getTime())
-    .slice(0, 5);
+  const handleToggleItem = (eventId: string, itemId: string) => {
+    const event = events.find((e) => e.id === eventId);
+    if (!event) return;
+
+    const checkedItems = event.checkedItems.includes(itemId)
+      ? event.checkedItems.filter((id) => id !== itemId)
+      : [...event.checkedItems, itemId];
+
+    updateCalendarEvent(eventId, { checkedItems });
+    refreshEvents();
+  };
+
+  const getEventItems = (event: CalendarEvent): ChecklistItem[] => {
+    const items: ChecklistItem[] = [];
+    event.suggestedChecklistIds.forEach((checklistId) => {
+      const checklist = checklists.find((c) => c.id === checklistId);
+      if (checklist) {
+        items.push(...checklist.items);
+      }
+    });
+    return items;
+  };
+
+  const allEvents = events
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+  const upcomingEvents = allEvents.filter((e) => !isPast(e.date) || isToday(e.date)).slice(0, 5);
+  const pastEvents = allEvents.filter((e) => isPast(e.date) && !isToday(e.date)).slice(0, 3);
 
   const selectedDateEvents = events.filter(
     (e) => selectedDate && format(e.date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
@@ -89,70 +115,108 @@ export const CalendarSidebar = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {upcomingEvents.map((event) => (
-                    <div
-                      key={event.id}
-                      className="rounded-lg border border-border/40 bg-card/30 backdrop-blur-sm p-3 hover-lift"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm text-foreground truncate">
-                            {event.title}
-                          </h4>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {format(event.date, "MMM d, yyyy")}
-                            {event.time && ` at ${event.time}`}
-                          </p>
-                          {event.suggestedChecklistIds.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {event.suggestedChecklistIds.map((id) => {
-                                const checklist = checklists.find((c) => c.id === id);
-                                return checklist ? (
-                                  <Badge
-                                    key={id}
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-                                    {checklist.name}
-                                  </Badge>
-                                ) : null;
-                              })}
-                            </div>
-                          )}
+                  {upcomingEvents.map((event) => {
+                    const items = getEventItems(event);
+                    const checkedCount = items.filter((item) =>
+                      event.checkedItems.includes(item.id)
+                    ).length;
+                    const isPastEvent = isPast(event.date) && !isToday(event.date);
+
+                    return (
+                      <div
+                        key={event.id}
+                        className={cn(
+                          "rounded-lg border border-border/40 bg-card/30 backdrop-blur-sm p-3 hover-lift transition-opacity",
+                          isPastEvent && "opacity-40"
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm text-foreground truncate">
+                              {event.title}
+                            </h4>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {format(event.date, "MMM d, yyyy")}
+                              {event.time && ` at ${event.time}`}
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                            onClick={() => handleDeleteEvent(event.id)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                          onClick={() => handleDeleteEvent(event.id)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
+
+                        {items.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-border/40">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Package className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs font-medium text-muted-foreground">
+                                Pack List ({checkedCount}/{items.length})
+                              </span>
+                            </div>
+                            <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                              {items.slice(0, 5).map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="flex items-center gap-2"
+                                >
+                                  <Checkbox
+                                    id={`${event.id}-${item.id}`}
+                                    checked={event.checkedItems.includes(item.id)}
+                                    onCheckedChange={() =>
+                                      handleToggleItem(event.id, item.id)
+                                    }
+                                    className="h-3 w-3"
+                                  />
+                                  <label
+                                    htmlFor={`${event.id}-${item.id}`}
+                                    className={cn(
+                                      "text-xs cursor-pointer flex-1",
+                                      event.checkedItems.includes(item.id) &&
+                                        "line-through text-muted-foreground"
+                                    )}
+                                  >
+                                    {item.text}
+                                  </label>
+                                </div>
+                              ))}
+                              {items.length > 5 && (
+                                <p className="text-xs text-muted-foreground italic">
+                                  +{items.length - 5} more items
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </ScrollArea>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {selectedDateEvents.length > 0 && (
+        {pastEvents.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="px-4">
-              Events on {format(selectedDate!, "MMM d")}
+            <SidebarGroupLabel className="px-4 text-muted-foreground/70">
+              Past Events
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <div className="space-y-2 px-4">
-                {selectedDateEvents.map((event) => (
+                {pastEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="rounded-lg border border-border/40 bg-card/30 p-2 text-sm"
+                    className="rounded-lg border border-border/20 bg-card/10 p-2 text-sm opacity-50"
                   >
-                    <p className="font-medium text-foreground">{event.title}</p>
-                    {event.time && (
-                      <p className="text-xs text-muted-foreground">{event.time}</p>
-                    )}
+                    <p className="font-medium text-foreground text-xs">{event.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(event.date, "MMM d, yyyy")}
+                    </p>
                   </div>
                 ))}
               </div>
