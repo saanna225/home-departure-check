@@ -137,3 +137,13 @@ export const updateSettings = (updates: Partial<Settings>): void => {
   const settings = getSettings();
   setSettings({ ...settings, ...updates });
 };
+
+// Reset all checklist items to unchecked (call on app initialization)
+export const resetChecklistItems = (): void => {
+  const checklists = getChecklists();
+  const resetChecklists = checklists.map((checklist) => ({
+    ...checklist,
+    items: checklist.items.map((item) => ({ ...item, checked: false })),
+  }));
+  setChecklists(resetChecklists);
+};
