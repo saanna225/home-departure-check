@@ -44,3 +44,12 @@ export interface WeatherSuggestion {
   item: string;
   reason: string;
 }
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  date: Date;
+  time?: string;
+  suggestedChecklistIds: string[];
+  notes?: string;
+}
