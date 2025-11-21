@@ -21,8 +21,8 @@ export async function getCurrentWeather(lat: number, lon: number): Promise<Weath
     );
     
     if (!response.ok) {
-      console.error('Weather API error:', response.statusText);
-      return null;
+      console.warn('Weather API error (using demo data):', response.statusText);
+      return getMockWeather();
     }
 
     const data = await response.json();
