@@ -20,7 +20,7 @@ import { getChecklists } from "@/lib/storage";
 import { CalendarEvent, ChecklistItem } from "@/lib/types";
 import { AddEventDialog } from "./AddEventDialog";
 import { EditEventDialog } from "./EditEventDialog";
-import { matchChecklistsByKeywords } from "@/lib/keywordMatcher";
+import { matchChecklistsByKeywords, getTemplateItemsForTitle } from "@/lib/keywordMatcher";
 import { cn } from "@/lib/utils";
 
 export const CalendarSidebar = () => {
@@ -71,6 +71,12 @@ export const CalendarSidebar = () => {
         items.push(...checklist.items);
       }
     });
+
+    // If no items from saved checklists, fall back to template items based on title keywords
+    if (items.length === 0) {
+      return getTemplateItemsForTitle(event.title);
+    }
+
     return items;
   };
   const allEvents = events
