@@ -4,9 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { MapPin, Navigation } from "lucide-react";
+import { MapPin, Navigation, Search } from "lucide-react";
 import { getSettings, updateSettings } from "@/lib/storage";
 import { toast } from "sonner";
+
+const WEATHER_API_KEY = 'b3fc347c6fec23bd0faf3e47f764767f';
+
+interface GeocodeResult {
+  name: string;
+  country: string;
+  state?: string;
+  lat: number;
+  lon: number;
+}
 
 export const LocationView = () => {
   const settings = getSettings();
@@ -14,6 +24,9 @@ export const LocationView = () => {
   const [manualLat, setManualLat] = useState(settings.manualLocation?.latitude.toString() ?? "");
   const [manualLng, setManualLng] = useState(settings.manualLocation?.longitude.toString() ?? "");
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<GeocodeResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -66,6 +79,53 @@ export const LocationView = () => {
     updateSettings({ useManualLocation: checked });
   };
 
+  const handleSearchLocation = async () => {
+    if (!searchQuery.trim()) {
+      toast.error("Please enter a city or place name");
+      return;
+    }
+
+    setIsSearching(true);
+    setSearchResults([]);
+
+    try {
+      const response = await fetch(
+        `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(searchQuery)}&limit=5&appid=${WEATHER_API_KEY}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to search location");
+      }
+
+      const data = await response.json();
+      
+      if (data.length === 0) {
+        toast.error("No locations found. Try a different search.");
+      } else {
+        setSearchResults(data);
+        toast.success(`Found ${data.length} location(s)`);
+      }
+    } catch (error) {
+      console.error("Location search error:", error);
+      toast.error("Failed to search location");
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSelectLocation = (result: GeocodeResult) => {
+    updateSettings({
+      homeLocation: {
+        latitude: result.lat,
+        longitude: result.lon,
+        address: `${result.name}, ${result.state ? result.state + ', ' : ''}${result.country}`,
+      },
+    });
+    toast.success(`Location set to ${result.name}`);
+    setSearchResults([]);
+    setSearchQuery("");
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -86,6 +146,9 @@ export const LocationView = () => {
           {settings.homeLocation ? (
             <div className="p-4 bg-secondary rounded-lg">
               <p className="text-sm font-medium mb-2">Current home location:</p>
+              {settings.homeLocation.address && (
+                <p className="text-sm mb-2">{settings.homeLocation.address}</p>
+              )}
               <p className="text-xs text-muted-foreground">
                 Latitude: {settings.homeLocation.latitude.toFixed(6)}
               </p>
@@ -101,9 +164,61 @@ export const LocationView = () => {
             </div>
           )}
 
+          <div className="space-y-2">
+            <Label htmlFor="location-search">Search by City or Place Name</Label>
+            <div className="flex gap-2">
+              <Input
+                id="location-search"
+                type="text"
+                placeholder="e.g., New York, London, Tokyo"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearchLocation()}
+              />
+              <Button
+                onClick={handleSearchLocation}
+                disabled={isSearching}
+                className="gap-2"
+              >
+                <Search className="h-4 w-4" />
+                {isSearching ? "Searching..." : "Search"}
+              </Button>
+            </div>
+          </div>
+
+          {searchResults.length > 0 && (
+            <div className="space-y-2">
+              <Label>Select a location:</Label>
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {searchResults.map((result, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSelectLocation(result)}
+                    className="w-full p-3 text-left bg-secondary hover:bg-secondary/80 rounded-lg transition-colors"
+                  >
+                    <p className="font-medium">{result.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {result.state ? `${result.state}, ` : ''}{result.country} • {result.lat.toFixed(4)}, {result.lon.toFixed(4)}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Or</span>
+            </div>
+          </div>
+
           <Button
             onClick={handleGetCurrentLocation}
             disabled={isGettingLocation}
+            variant="outline"
             className="w-full gap-2"
           >
             <Navigation className="h-4 w-4" />
