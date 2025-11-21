@@ -20,6 +20,7 @@ import { getChecklists } from "@/lib/storage";
 import { CalendarEvent, ChecklistItem } from "@/lib/types";
 import { AddEventDialog } from "./AddEventDialog";
 import { EditEventDialog } from "./EditEventDialog";
+import { matchChecklistsByKeywords } from "@/lib/keywordMatcher";
 import { cn } from "@/lib/utils";
 
 export const CalendarSidebar = () => {
@@ -28,7 +29,6 @@ export const CalendarSidebar = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  const checklists = getChecklists();
 
   const refreshEvents = () => {
     setEvents(getCalendarEvents());
@@ -59,15 +59,20 @@ export const CalendarSidebar = () => {
 
   const getEventItems = (event: CalendarEvent): ChecklistItem[] => {
     const items: ChecklistItem[] = [];
-    event.suggestedChecklistIds.forEach((checklistId) => {
-      const checklist = checklists.find((c) => c.id === checklistId);
+    const allChecklists = getChecklists();
+
+    const matchedIds = event.suggestedChecklistIds.length
+      ? event.suggestedChecklistIds
+      : matchChecklistsByKeywords(event.title, allChecklists);
+
+    matchedIds.forEach((checklistId) => {
+      const checklist = allChecklists.find((c) => c.id === checklistId);
       if (checklist) {
         items.push(...checklist.items);
       }
     });
     return items;
   };
-
   const allEvents = events
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
