@@ -19,21 +19,30 @@ import { getCalendarEvents, deleteCalendarEvent, updateCalendarEvent } from "@/l
 import { getChecklists } from "@/lib/storage";
 import { CalendarEvent, ChecklistItem } from "@/lib/types";
 import { AddEventDialog } from "./AddEventDialog";
+import { EditEventDialog } from "./EditEventDialog";
 import { cn } from "@/lib/utils";
 
 export const CalendarSidebar = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>(getCalendarEvents());
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const checklists = getChecklists();
 
   const refreshEvents = () => {
     setEvents(getCalendarEvents());
   };
 
-  const handleDeleteEvent = (id: string) => {
+  const handleDeleteEvent = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the card click
     deleteCalendarEvent(id);
     refreshEvents();
+  };
+
+  const handleEventClick = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setEditDialogOpen(true);
   };
 
   const handleToggleItem = (eventId: string, itemId: string) => {
@@ -125,8 +134,9 @@ export const CalendarSidebar = () => {
                     return (
                       <div
                         key={event.id}
+                        onClick={() => handleEventClick(event)}
                         className={cn(
-                          "rounded-lg border border-border/40 bg-card/30 backdrop-blur-sm p-3 hover-lift transition-opacity",
+                          "rounded-lg border border-border/40 bg-card/30 backdrop-blur-sm p-3 hover-lift transition-opacity cursor-pointer",
                           isPastEvent && "opacity-40"
                         )}
                       >
@@ -144,13 +154,13 @@ export const CalendarSidebar = () => {
                             size="sm"
                             variant="ghost"
                             className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                            onClick={() => handleDeleteEvent(event.id)}
+                            onClick={(e) => handleDeleteEvent(event.id, e)}
                           >
                             <X className="h-3 w-3" />
                           </Button>
                         </div>
 
-                        {items.length > 0 && (
+                        {items.length > 0 ? (
                           <div className="mt-3 pt-3 border-t border-border/40">
                             <div className="flex items-center gap-2 mb-2">
                               <Package className="h-3 w-3 text-muted-foreground" />
@@ -163,6 +173,7 @@ export const CalendarSidebar = () => {
                                 <div
                                   key={item.id}
                                   className="flex items-center gap-2"
+                                  onClick={(e) => e.stopPropagation()}
                                 >
                                   <Checkbox
                                     id={`${event.id}-${item.id}`}
@@ -190,6 +201,15 @@ export const CalendarSidebar = () => {
                                 </p>
                               )}
                             </div>
+                          </div>
+                        ) : (
+                          <div className="mt-3 pt-3 border-t border-border/40 text-center">
+                            <p className="text-xs text-muted-foreground">
+                              No matching checklists found
+                            </p>
+                            <p className="text-xs text-muted-foreground/70 mt-1">
+                              Try keywords like: gym, beach, work, travel
+                            </p>
                           </div>
                         )}
                       </div>
@@ -228,6 +248,13 @@ export const CalendarSidebar = () => {
       <AddEventDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
+        onSuccess={refreshEvents}
+      />
+
+      <EditEventDialog
+        event={selectedEvent}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
         onSuccess={refreshEvents}
       />
     </Sidebar>

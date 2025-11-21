@@ -2,14 +2,14 @@ import { Checklist } from "./types";
 
 // Keywords that might indicate which checklist to use
 const keywordMap: Record<string, string[]> = {
-  gym: ["gym", "workout", "exercise", "fitness", "training", "sport"],
-  work: ["work", "office", "meeting", "presentation", "conference"],
-  beach: ["beach", "pool", "swim", "ocean", "sea", "coast"],
-  travel: ["travel", "trip", "vacation", "holiday", "flight", "airport"],
-  hiking: ["hike", "hiking", "trek", "mountain", "trail", "camp", "camping"],
+  gym: ["gym", "workout", "exercise", "fitness", "training", "sport", "yoga", "pilates"],
+  work: ["work", "office", "meeting", "presentation", "conference", "business"],
+  beach: ["beach", "pool", "swim", "swimming", "ocean", "sea", "coast", "water park", "waterpark", "water", "amusement"],
+  travel: ["travel", "trip", "vacation", "holiday", "flight", "airport", "hotel", "tour"],
+  hiking: ["hike", "hiking", "trek", "trekking", "mountain", "trail", "camp", "camping", "outdoor"],
   home: ["home", "house", "apartment", "place"],
-  shopping: ["shop", "shopping", "grocery", "groceries", "store", "market"],
-  school: ["school", "class", "college", "university", "study"],
+  shopping: ["shop", "shopping", "grocery", "groceries", "store", "market", "mall"],
+  school: ["school", "class", "college", "university", "study", "exam"],
 };
 
 export const matchChecklistsByKeywords = (
