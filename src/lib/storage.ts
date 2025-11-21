@@ -32,6 +32,21 @@ const DEFAULT_CHECKLISTS: Checklist[] = [
       { id: "4", text: "Phone charger", checked: false },
     ],
   },
+  {
+    id: "beach",
+    name: "Beach",
+    icon: "Waves",
+    color: "hsl(195 85% 55%)",
+    items: [
+      { id: "1", text: "Swim wear", checked: false },
+      { id: "2", text: "Sunglasses", checked: false },
+      { id: "3", text: "Scarf", checked: false },
+      { id: "4", text: "Sunscreen", checked: false },
+      { id: "5", text: "Extra bag", checked: false },
+      { id: "6", text: "Sandals", checked: false },
+      { id: "7", text: "Towels", checked: false },
+    ],
+  },
 ];
 
 const DEFAULT_SETTINGS: Settings = {
