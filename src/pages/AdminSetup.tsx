@@ -46,12 +46,19 @@ export default function AdminSetup() {
     if (!user) return;
 
     setLoading(true);
-    const { error } = await supabase
-      .from('user_roles')
-      .insert({ user_id: user.id, role: 'admin' });
+    
+    const { data, error } = await supabase.functions.invoke('grant-admin', {
+      body: { action: 'self-admin' }
+    });
 
-    if (error) {
-      toast.error("Failed to set admin role. You might already be an admin.");
+    if (error || !data?.success) {
+      const errorMsg = data?.error || error?.message || 'Failed to grant admin access';
+      if (errorMsg.includes('configured admin email')) {
+        toast.error("Access Denied: Only the configured admin email can access this page");
+      } else {
+        toast.error(errorMsg);
+      }
+      console.error('Admin grant error:', error || data?.error);
     } else {
       toast.success("You are now an admin!");
       setIsAdmin(true);
@@ -96,11 +103,14 @@ export default function AdminSetup() {
                 <p className="text-sm text-muted-foreground">
                   Logged in as: <span className="font-medium text-foreground">{user?.email}</span>
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  Click the button below to grant yourself admin access. This will allow you to view all feedback submissions.
-                </p>
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+                  <p className="text-sm text-amber-600 dark:text-amber-400">
+                    <strong>Security Check:</strong> Only the configured admin email can grant themselves admin access. 
+                    If you're not the authorized admin, this action will be denied.
+                  </p>
+                </div>
                 <Button onClick={makeAdmin} disabled={loading} className="w-full">
-                  {loading ? "Setting up..." : "Make Me Admin"}
+                  {loading ? "Verifying access..." : "Request Admin Access"}
                 </Button>
               </>
             )}
