@@ -6,48 +6,8 @@ const STORAGE_KEYS = {
   SETTINGS: "prepcheck_settings",
 };
 
-// Default data
-const DEFAULT_CHECKLISTS: Checklist[] = [
-  {
-    id: "gym",
-    name: "Gym",
-    icon: "Dumbbell",
-    color: "hsl(185 75% 45%)",
-    items: [
-      { id: "1", text: "Water bottle", checked: false },
-      { id: "2", text: "Towel", checked: false },
-      { id: "3", text: "Gym shoes", checked: false },
-      { id: "4", text: "Wireless earbuds", checked: false },
-    ],
-  },
-  {
-    id: "work",
-    name: "Work",
-    icon: "Briefcase",
-    color: "hsl(215 75% 45%)",
-    items: [
-      { id: "1", text: "Laptop", checked: false },
-      { id: "2", text: "Wallet", checked: false },
-      { id: "3", text: "Keys", checked: false },
-      { id: "4", text: "Phone charger", checked: false },
-    ],
-  },
-  {
-    id: "beach",
-    name: "Beach",
-    icon: "Waves",
-    color: "hsl(195 85% 55%)",
-    items: [
-      { id: "1", text: "Swim wear", checked: false },
-      { id: "2", text: "Sunglasses", checked: false },
-      { id: "3", text: "Scarf", checked: false },
-      { id: "4", text: "Sunscreen", checked: false },
-      { id: "5", text: "Extra bag", checked: false },
-      { id: "6", text: "Sandals", checked: false },
-      { id: "7", text: "Towels", checked: false },
-    ],
-  },
-];
+// Default data - empty for new users
+const DEFAULT_CHECKLISTS: Checklist[] = [];
 
 const DEFAULT_SETTINGS: Settings = {
   homeLocation: null,
@@ -60,7 +20,6 @@ const DEFAULT_SETTINGS: Settings = {
 export const getChecklists = (): Checklist[] => {
   const stored = localStorage.getItem(STORAGE_KEYS.CHECKLISTS);
   if (!stored) {
-    setChecklists(DEFAULT_CHECKLISTS);
     return DEFAULT_CHECKLISTS;
   }
   return JSON.parse(stored);
