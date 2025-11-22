@@ -90,6 +90,10 @@ export default {
           from: { opacity: "0", transform: "translateY(20px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        marquee: {
+          "0%": { transform: "translateX(100%)" },
+          "100%": { transform: "translateX(-100%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -98,6 +102,7 @@ export default {
         "float-delayed": "float 6s ease-in-out infinite 2s",
         "pulse-glow": "pulse-glow 3s ease-in-out infinite",
         "slide-in-up": "slide-in-up 0.5s ease-out",
+        marquee: "marquee 20s linear infinite",
       },
     },
   },
