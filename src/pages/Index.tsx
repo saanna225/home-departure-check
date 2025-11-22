@@ -67,11 +67,16 @@ const Index = () => {
           <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl shadow-sm">
             <div className="container mx-auto px-4 py-4 flex items-center gap-3">
               <SidebarTrigger />
-              <div>
+              <div className="flex-1">
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent animate-pulse-glow">
                   PrepCheck
                 </h1>
                 <p className="text-sm text-muted-foreground">Never forget what matters</p>
+                <div className="overflow-hidden mt-1">
+                  <p className="text-xs text-primary/70 animate-[slide-in-right_15s_linear_infinite] whitespace-nowrap">
+                    An app that acts as a memory jogger, weather essential helper. With you, Always
+                  </p>
+                </div>
               </div>
             </div>
           </header>
