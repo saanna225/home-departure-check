@@ -72,8 +72,8 @@ const Index = () => {
                   PrepCheck
                 </h1>
                 <p className="text-sm text-muted-foreground">Never forget what matters</p>
-                <div className="overflow-hidden mt-1">
-                  <p className="text-xs text-primary/70 animate-[slide-in-right_15s_linear_infinite] whitespace-nowrap">
+                <div className="overflow-hidden mt-1 relative">
+                  <p className="text-xs text-primary/70 animate-marquee whitespace-nowrap inline-block">
                     An app that acts as a memory jogger, weather essential helper. With you, Always
                   </p>
                 </div>
