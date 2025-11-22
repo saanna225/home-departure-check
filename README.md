@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/c2a106cb-5f87-47c4-93e7-1c8ad221f7f
+**URL**: https://anythingelse.lovable.app/
 
 
 ## What technologies are used for this project?
@@ -11,6 +11,10 @@ This project is built with:
 
 - Vite
 - TypeScript
+
+https://github.com/user-attachments/assets/c5e415eb-fe99-4d45-9b8d-c1a52e605b11
+
+
 - React
 - shadcn-ui
 - Tailwind CSS
