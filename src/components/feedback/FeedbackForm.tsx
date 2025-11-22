@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Star } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const FeedbackForm = () => {
   const [name, setName] = useState("Anonymous");
@@ -12,7 +13,7 @@ export const FeedbackForm = () => {
   const [feedback, setFeedback] = useState("");
   const [hoveredStar, setHoveredStar] = useState(0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (rating === 0) {
@@ -20,8 +21,20 @@ export const FeedbackForm = () => {
       return;
     }
 
-    // Here you would normally send this to a backend
-    console.log({ name, rating, feedback });
+    // Save to database
+    const { error } = await supabase
+      .from('feedback')
+      .insert({
+        name: name || 'Anonymous',
+        rating,
+        feedback_text: feedback
+      });
+
+    if (error) {
+      toast.error("Failed to submit feedback. Please try again.");
+      console.error('Feedback submission error:', error);
+      return;
+    }
     
     toast.success("Thank you for your feedback!");
     setRating(0);
