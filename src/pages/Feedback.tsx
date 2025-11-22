@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star, ArrowLeft, Trash2 } from "lucide-react";
+import { Star, ArrowLeft, Trash2, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { User } from "@supabase/supabase-js";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,11 +28,44 @@ interface Feedback {
 
 export default function Feedback() {
   const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [feedbackList, setFeedbackList] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      navigate("/auth");
+      return false;
+    }
+
+    setUser(session.user);
+
+    // Check if user is admin
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', session.user.id)
+      .eq('role', 'admin')
+      .maybeSingle();
+
+    if (error || !data) {
+      toast.error("You need admin access to view feedback");
+      navigate("/admin-setup");
+      return false;
+    }
+
+    setIsAdmin(true);
+    return true;
+  };
+
   const fetchFeedback = async () => {
+    const isAuthorized = await checkAuth();
+    if (!isAuthorized) return;
+
     setLoading(true);
     const { data, error } = await supabase
       .from('feedback')
@@ -117,8 +151,11 @@ export default function Feedback() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">User Feedback</h1>
-              <p className="text-muted-foreground">View all submitted feedback</p>
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-primary" />
+                <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
+              </div>
+              <p className="text-muted-foreground">View and manage user feedback</p>
             </div>
           </div>
           <Button variant="outline" onClick={fetchFeedback}>
