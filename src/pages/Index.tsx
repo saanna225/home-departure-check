@@ -135,15 +135,21 @@ const Index = () => {
               <div className="max-w-2xl mx-auto space-y-4">
                 <FeedbackForm />
                 
-                {/* View Feedback Button */}
-                <div className="text-center">
+                {/* Admin Links */}
+                <div className="flex flex-col sm:flex-row gap-2 justify-center">
                   <Button
                     variant="outline"
-                    onClick={() => navigate("/feedback")}
-                    className="gap-2"
+                    onClick={() => navigate("/auth")}
+                    size="sm"
                   >
-                    <MessageSquare className="h-4 w-4" />
-                    View All Feedback
+                    Admin Login
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate("/admin-setup")}
+                    size="sm"
+                  >
+                    Admin Setup
                   </Button>
                 </div>
               </div>
