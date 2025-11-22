@@ -127,14 +127,21 @@ export const CalendarSidebar = () => {
         <SidebarGroup>
           <div className="flex items-center justify-between px-4">
             <SidebarGroupLabel>Upcoming Events</SidebarGroupLabel>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-8 w-8 p-0"
-              onClick={() => setDialogOpen(true)}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 w-8 p-0 flex-shrink-0"
+                  onClick={() => setDialogOpen(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Add Event</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
           <div className="px-4 pb-2">
             <div className="relative">
