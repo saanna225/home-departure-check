@@ -26,8 +26,10 @@ import { EventCard } from "./EventCard";
 import { matchChecklistsByKeywords, getTemplateItemsForTitle } from "@/lib/keywordMatcher";
 import { cn } from "@/lib/utils";
 import { useSwipe } from "@/hooks/useSwipe";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const CalendarSidebar = () => {
+  const isMobile = useIsMobile();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>(getCalendarEvents());
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -101,7 +103,7 @@ export const CalendarSidebar = () => {
   );
 
   return (
-    <Sidebar className="border-r border-border/40 backdrop-blur-xl bg-background/50">
+    <Sidebar className="border-r border-border/40 backdrop-blur-xl bg-background/50 relative">
       <SidebarHeader className="border-b border-border/40 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -213,6 +215,17 @@ export const CalendarSidebar = () => {
           </SidebarGroup>
         )}
       </SidebarContent>
+
+      {/* Mobile floating action button */}
+      {isMobile && (
+        <Button
+          size="lg"
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50"
+          onClick={() => setDialogOpen(true)}
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      )}
 
       <AddEventDialog
         open={dialogOpen}
