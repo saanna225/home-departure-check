@@ -7,11 +7,14 @@ import { LocationView } from "@/components/location/LocationView";
 import { ReminderPreview } from "@/components/reminders/ReminderPreview";
 import { CalendarSidebar } from "@/components/calendar/CalendarSidebar";
 import { FeedbackForm } from "@/components/feedback/FeedbackForm";
-import { ListChecks, Calendar, MapPin, Bell } from "lucide-react";
+import { ListChecks, Calendar, MapPin, Bell, MessageSquare } from "lucide-react";
 import { checkAndTriggerReminders } from "@/lib/reminderEngine";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("checklists");
 
   // Check for reminders on mount and periodically
@@ -129,8 +132,20 @@ const Index = () => {
           <footer className="border-t border-border bg-card/80 backdrop-blur-xl">
             <div className="container mx-auto px-4 py-8 space-y-8">
               {/* Feedback Form */}
-              <div className="max-w-2xl mx-auto">
+              <div className="max-w-2xl mx-auto space-y-4">
                 <FeedbackForm />
+                
+                {/* View Feedback Button */}
+                <div className="text-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate("/feedback")}
+                    className="gap-2"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    View All Feedback
+                  </Button>
+                </div>
               </div>
 
               {/* Closing Message */}
