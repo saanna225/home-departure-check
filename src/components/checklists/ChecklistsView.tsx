@@ -40,7 +40,7 @@ export const ChecklistsView = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Your Checklists</h2>
-          <p className="text-sm text-muted-foreground">Manage items you need for different activities</p>
+          <p className="text-sm text-muted-foreground">Organize items you need for different activities</p>
         </div>
         <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
           <Plus className="h-4 w-4" />
